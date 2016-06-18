@@ -1,0 +1,174 @@
+'use strict'
+
+var InventoryModel = require('../model/inventoryModel');
+var dbContext = require('../model/dbContext');
+var cache = require('../model/dbContext').redisClient;
+
+//private functions
+var getInventoryItem = function(searchParams) {
+    return InventoryModel.find(searchParams, function(err, items) {
+      console.log('search params here', searchParams);
+        if(err) {
+        } else {
+
+          var cacheKey = 'cache:inventory';
+          for(var key in searchParams) {
+            cacheKey+= ':' + searchParams[key];
+          }
+            console.log('cache set', cacheKey);
+            console.log('caching this...', items.toString());
+            cache.setex(cacheKey, 300, JSON.stringify(items));
+            return items;
+        }
+    });
+};
+
+var getInventoryItemByTerm = function(searchTerm) {
+
+    var re = new RegExp(searchTerm, 'i');
+    
+    return InventoryModel.find().or([{ 'itemName': { $regex: re }}, { 'keywords': { $regex: re }}, { 'itemCategory': { $regex: re }}, { 'itemShortDescription': { $regex: re }}]).sort('itemName').exec(function(err, items) {
+        if(err) {
+        } else {
+            return items;
+        }
+    });
+};
+
+var getInventoryItemByAttribute = function(searchParams) {
+
+    if (!searchParams) {
+    return new Promise((resolve, reject) => reject('No item found'));
+    }
+    return getInventoryItem(searchParams);
+
+}
+
+//public functions
+var getInventoryItemById = function(id) {
+
+  if (!id) {
+    return new Promise((resolve, reject) => reject('No id provided'));
+  }
+  var searchParameters = { _id: id };
+  return getInventoryItemByAttribute(searchParameters);
+
+}
+
+var getInventoryItemBySku = function(sku) {
+
+  if (!sku) {
+    return new Promise((resolve, reject) => reject('No sku provided'));
+  }
+  var searchParameters = { sku: sku };
+  return getInventoryItemByAttribute(searchParameters);
+
+}
+
+var getInventoryItemBySearch = function(q) {
+
+  if (!q) {
+    return new Promise((resolve, reject) => reject('No search term provided'));
+  }
+
+  return getInventoryItemByTerm(q);
+
+}
+
+var getInventoryItemsByPage = function(page, num, offset) {
+
+  var page = page || 1;
+  var num = num || 1;
+  var offset = offset || 15;
+
+  var searchParameters = { sku: true };
+  return getInventoryItemByAttribute(searchParameters);
+
+}
+
+var getInventoryItemsList = function() {
+
+  var searchParameters = {};
+  return getInventoryItemByAttribute(searchParameters);
+
+}
+
+var checkExistingItemBySku = function(data) {
+
+  data.sku = data.sku || '';
+
+  return new Promise(function(resolve, reject){
+    InventoryModel.find({ sku: data.sku }, function(err, data) {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(data);
+      }
+    });
+    
+  });
+
+}
+
+var checkExistingItemById = function(data) {
+
+  data._id = data._id || '';
+
+  console.log(data._id);
+
+  return new Promise(function(resolve, reject){
+    InventoryModel.find({ _id: data._id }, function(err, data) {
+      if (err) {
+        reject(err);
+      } else {
+        console.log('by id data', data);
+        resolve(data);
+      }
+    });
+    
+  });
+
+}
+
+var addInventoryItem = function(data) {
+  
+  var newItem = new InventoryModel(data);
+
+  return new Promise(function(resolve, reject){
+    newItem.save(function(err, res) {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(res);
+      }
+    });
+    
+  });
+
+}
+
+var updateInventoryItem = function(data) {
+
+  return new Promise(function(resolve, reject){
+    InventoryModel.update({ _id: data._id}, data, function(err, res) {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(res);
+      }
+    });
+    
+  });
+
+}
+
+//export public functions
+module.exports.getInventoryItemById = getInventoryItemById;
+module.exports.getInventoryItemBySku = getInventoryItemBySku;
+module.exports.getInventoryItemsList = getInventoryItemsList;
+module.exports.getInventoryItemBySearch = getInventoryItemBySearch;
+module.exports.getInventoryItemByAttribute = getInventoryItemByAttribute;
+module.exports.checkExistingItemBySku = checkExistingItemBySku;
+module.exports.checkExistingItemById = checkExistingItemById;
+module.exports.addInventoryItem = addInventoryItem;
+module.exports.updateInventoryItem = updateInventoryItem;
