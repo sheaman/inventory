@@ -27,7 +27,7 @@ var jwtCheck = jwt({
 
 // get main routes
 var admin = require('./routes/admin/');
-var inventory = require('./test');
+var inventory = require('./routes/inventory');
 var cache = require('../modules/cache');
 
 app.use('/admin', admin);
