@@ -13,8 +13,9 @@ router.use(bodyParser.json()); // for parsing application/json
 router.use(bodyParser.urlencoded({ extended: true })); // for parsing application/x-www-form-urlencoded
 
 router.get('/', getInventoryHandler);
+router.get('/:id', getInventoryHandler);
 router.post('/', postInventoryHandler);
-router.put('/', putInventoryHandler);
+router.put('/:id', putInventoryHandler);
 
 //router.get('/', getInventoryHandler);
 

@@ -23,11 +23,13 @@ var handleErrorForResponse = function handleErrorForResponse(errorCode, res, act
 function getInventoryHandler(req, res) {
     var findItem;
     var itemIdentifier;
-    logger.info(req.query);
 
     if (req.query.id) {
         findItem = Inventory.getInventoryItemById;
         itemIdentifier = req.query.id;
+    } else if (req.params.id) {
+        findItem = Inventory.getInventoryItemById;
+        itemIdentifier = req.params.id;        
     } else if (req.query.sku) {
         findItem = Inventory.getInventoryItemBySku;
         itemIdentifier = req.query.sku;
@@ -44,9 +46,11 @@ function getInventoryHandler(req, res) {
         findItem = Inventory.getInventoryItemByAttribute;
         itemIdentifier = { itemType: req.query.type };
     } else {
-        return res.status(400).send(
-        { message: 'You need to specify an id or sku as a query param.' }
-      );
+    //     return res.status(400).send(
+    //     { message: 'You need to specify an id or sku as a query param.' }
+    //   );
+        findItem = Inventory.getInventoryItemsList;
+        itemIdentifier = '';    
     }
 
     return findItem(itemIdentifier)
@@ -102,23 +106,22 @@ function postInventoryHandler(req, res) {
 function putInventoryHandler(req, res) {
 
     var inventoryData = req.body;
-    return Inventory.checkExistingItemById(inventoryData)
+    return Inventory.checkExistingItemBySku(inventoryData)
     .then(function(existingItem) {
-
         if (existingItem instanceof Array) {
-            if (existingItem.length === 0) {
-                res.status(400).json({ message: 'item already exists' });
+            if (existingItem.length > 0 && existingItem[0].sku === inventoryData.sku && existingItem[0]._id.toString() !== inventoryData._id) {
+                res.status(400).json({ message: 'Item sku already exists' });
             } else {
                 Inventory.updateInventoryItem(inventoryData)
                 .then(function(updateResponse) {
                     if (updateResponse instanceof Object && updateResponse.ok) {
                         res.status(200).json(inventoryData);
                     } else {
-                        res.status(400).json({ message: 'item was not updated' });
+                        res.status(400).json({ message: 'Item was not updated' });
                     }
 
                 })
-                .catch(handleErrorForResponse(500, res, 'addItem'));
+                .catch(handleErrorForResponse(503, res, 'updateItem'));
                 }
         }
     })

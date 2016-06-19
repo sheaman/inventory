@@ -13,7 +13,14 @@ var dbContext = require('../model/dbContext');
 // add necessary middleware (security, data parsing etc)
 
 app.disable('x-powered-by');
-app.use(helmet())
+//app.use(helmet())
+
+app.use(function(req, res, next) {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+  res.header('Access-Control-Allow-Methods', 'GET, PUT, POST, DELETE, HEAD, OPTIONS');
+  next();
+});
 
 // todo: implement Auth0
 var jwtCheck = jwt({
