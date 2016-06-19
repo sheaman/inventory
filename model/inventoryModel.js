@@ -13,28 +13,27 @@ var InventorySchema = mongoose.Schema(
     itemCategory: {
       type: String,
       trim: true
-    },    
+    },
     itemName: {
       type: String,
       trim: true
-    },
-    itemShortDescription: {
+    },itemShortDescription: {
       type: String,
       trim: true
-    },    
+    },
     itemLongDescription: {
       type: String,
       trim: true
-    },        
+    },
     keywords: {
       type: String,
       trim: true
-    },    
+    },
     sku: {
       type: String,
       required: [true, 'sku is required'],
       trim: true,
-      unique: true,
+      unique: true
     },
     isActive: { type: Boolean, default: true },
     modifiedDate: {
