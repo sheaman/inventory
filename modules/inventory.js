@@ -128,6 +128,19 @@ function putInventoryHandler(req, res) {
     .catch(handleErrorForResponse(500, res, 'checkItem'));
 }
 
+function removeInventoryHandler(req, res) {
+
+    var inventoryData = req.params;
+    return Inventory.removeInventoryItem(inventoryData)
+    .then(function(removeResponse) {
+
+        res.status(200).json({message: 'OK'});
+
+    })
+    .catch(handleErrorForResponse(500, res, 'removeItem'));
+}
+
 module.exports.getInventoryHandler = getInventoryHandler;
 module.exports.postInventoryHandler = postInventoryHandler;
 module.exports.putInventoryHandler = putInventoryHandler;
+module.exports.removeInventoryHandler = removeInventoryHandler;
