@@ -29,6 +29,7 @@ app.use('/', function(req, res, next) {
             if (err) {
                 logger.error(err)
             } else {
+                logger.info('cacheKey GET', cacheKey);
                 if (typeof reply === 'string' && reply.length > 0) {
                     res.setHeader('X-CACHE', 'HIT');
                     res.json(JSON.parse(reply));

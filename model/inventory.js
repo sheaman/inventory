@@ -154,6 +154,25 @@ var updateInventoryItem = function(data) {
 
 }
 
+var removeInventoryItem = function(data) {
+  return new Promise(function(resolve, reject) {
+    InventoryModel.remove({ _id: data.id}, function(err, res) {
+      if (err) {
+        reject(err);
+      } else {
+
+        var cacheKey = 'cache:inventory:' + data.id;
+        cache.expire(cacheKey, 1);
+        var cacheKeyList = 'cache:inventory';
+        cache.expire(cacheKeyList, 1);
+        resolve(res);
+      }
+
+    });
+  });
+
+}
+
 //export public functions
 module.exports.getInventoryItemById = getInventoryItemById;
 module.exports.getInventoryItemBySku = getInventoryItemBySku;
@@ -163,4 +182,5 @@ module.exports.getInventoryItemByAttribute = getInventoryItemByAttribute;
 module.exports.checkExistingItemBySku = checkExistingItemBySku;
 module.exports.checkExistingItemById = checkExistingItemById;
 module.exports.addInventoryItem = addInventoryItem;
+module.exports.removeInventoryItem = removeInventoryItem;
 module.exports.updateInventoryItem = updateInventoryItem;

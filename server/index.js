@@ -17,7 +17,7 @@ app.disable('x-powered-by');
 
 app.use(function(req, res, next) {
   res.header("Access-Control-Allow-Origin", "*");
-  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
   res.header('Access-Control-Allow-Methods', 'GET, PUT, POST, DELETE, HEAD, OPTIONS');
   next();
 });
@@ -26,7 +26,7 @@ app.use(function(req, res, next) {
 var jwtCheck = jwt({
   secret: new Buffer(process.env.AUTH0_CLIENT_SECRET, 'base64'),
   audience: process.env.AUTH0_CLIENT_ID,
-  credentialsRequired: false,
+  credentialsRequired: true,
   fail: function (req, res) {
       logger.error(req);
       if (!req.headers.authorization){
@@ -39,6 +39,7 @@ var jwtCheck = jwt({
 // load routes
 var admin = require('./routes/admin/');
 var inventory = require('./routes/inventory');
+var dev = require('./test');
 
 // load modules
 var cache = require('../modules/cache');
@@ -47,6 +48,7 @@ var cache = require('../modules/cache');
 app.use('/admin', admin);
 
 app.use('/inventory', cache, inventory);
+app.use('/dev', dev);
 app.use('/status', function(req, res) {
     res.json({'message' : 'OK'});
 })
