@@ -1,8 +1,5 @@
 inventory:
   build: ./
-  
-  build:
-    dockerfile: Dockerfile
 
 redis-demo:
   image: redis:3.0
