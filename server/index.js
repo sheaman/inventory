@@ -10,19 +10,22 @@ var app = express();
 
 var dbContext = require('../model/dbContext');
 
-// add necessary middleware (security, data parsing etc)
 
+//disable x-powered-by 
 app.disable('x-powered-by');
-//app.use(helmet())
 
+//add basic helmet protections
+app.use(helmet())
+
+//CORS
 app.use(function(req, res, next) {
-  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Origin", "http://localhost:8080");
   res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
   res.header('Access-Control-Allow-Methods', 'GET, PUT, POST, DELETE, HEAD, OPTIONS');
   next();
 });
 
-// todo: implement Auth0
+// add Auth0 credentials and handler middleware
 var jwtCheck = jwt({
   secret: new Buffer(process.env.AUTH0_CLIENT_SECRET, 'base64'),
   audience: process.env.AUTH0_CLIENT_ID,
@@ -41,17 +44,20 @@ var admin = require('./routes/admin/');
 var inventory = require('./routes/inventory');
 var dev = require('./test');
 
-// load modules
+// load redis cache module
 var cache = require('../modules/cache');
 
+// handle top level routes
 
-app.use('/admin', admin);
+app.use('/status', function(req, res) {
+    res.json({'message' : 'OK'});
+});
+
+//app.use('/admin', admin);
 
 app.use('/inventory', cache, inventory);
 app.use('/dev', dev);
-app.use('/status', function(req, res) {
-    res.json({'message' : 'OK'});
-})
+
 
 // init Mongo and run server
 Promise.all([

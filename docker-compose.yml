@@ -1,0 +1,12 @@
+node:5:
+  dockerfile: Dockerfile
+
+redis-demo:
+  image: redis:3.0
+  ports:
+    - "6379:6379"
+
+mongodb-demo:
+  image: mongo:3.2
+  ports:
+    - "27017:27017"

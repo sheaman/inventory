@@ -19,9 +19,9 @@ var jwtCheck = jwt({
   fail: function (req, res) {
       logger.error(req);
       if (!req.headers.authorization){
-        res.send(401, 'missing authorization header');
+        res.status(401).json({message: 'Missing Authorization Header'});
       }
-      res.send(401);
+      res.status(401).json({message: 'Not Authorized'});
     }
 });
 
